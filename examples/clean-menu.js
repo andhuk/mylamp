@@ -69,56 +69,67 @@
     }
     
     function showManageDialog() {
-        var settings = getSettings();
-        var items = [];
+        console.log(PLUGIN_NAME, 'showManageDialog called');
         
-        // Collect all settings components
-        var timer = setInterval(function () {
-            var settingsItems = $('.settings .settings-param[data-component]');
-            if (settingsItems.length) {
-                clearInterval(timer);
+        // Go back to main settings first
+        Lampa.Activity.back();
+        
+        setTimeout(function () {
+            var settings = getSettings();
+            var items = [];
+            
+            // Collect all settings components
+            var timer = setInterval(function () {
+                var settingsItems = $('.settings .settings-param[data-component]');
+                console.log(PLUGIN_NAME, 'Found settings items:', settingsItems.length);
                 
-                var i;
-                for (i = 0; i < settingsItems.length; i++) {
-                    var item = $(settingsItems[i]);
-                    var component = item.attr('data-component');
-                    var name = item.find('.settings-param__name').text() || component;
+                if (settingsItems.length) {
+                    clearInterval(timer);
                     
-                    if (component && component !== 'clean_menu') {
-                        var isHidden = false;
-                        var j;
-                        for (j = 0; j < settings.hidden.length; j++) {
-                            if (settings.hidden[j] === component) {
-                                isHidden = true;
-                                break;
-                            }
-                        }
+                    var i;
+                    for (i = 0; i < settingsItems.length; i++) {
+                        var item = $(settingsItems[i]);
+                        var component = item.attr('data-component');
+                        var name = item.find('.settings-param__name').text() || component;
                         
-                        items.push({
-                            title: name + (isHidden ? ' [Приховано]' : ''),
-                            component: component,
-                            hidden: isHidden
-                        });
+                        if (component && component !== 'clean_menu') {
+                            var isHidden = false;
+                            var j;
+                            for (j = 0; j < settings.hidden.length; j++) {
+                                if (settings.hidden[j] === component) {
+                                    isHidden = true;
+                                    break;
+                                }
+                            }
+                            
+                            items.push({
+                                title: name + (isHidden ? ' [Приховано]' : ''),
+                                component: component,
+                                hidden: isHidden
+                            });
+                        }
                     }
-                }
-                
-                if (items.length === 0) {
-                    Lampa.Noty.show('Розділи не знайдено');
-                    return;
-                }
-                
-                Lampa.Select.show({
-                    title: 'Управління меню',
-                    items: items,
-                    onSelect: function (item) {
-                        toggleItemVisibility(item.component);
-                    },
-                    onBack: function () {
-                        Lampa.Controller.toggle('settings');
+                    
+                    console.log(PLUGIN_NAME, 'Collected items:', items.length);
+                    
+                    if (items.length === 0) {
+                        Lampa.Noty.show('Розділи не знайдено');
+                        return;
                     }
-                });
-            }
-        }, 100);
+                    
+                    Lampa.Select.show({
+                        title: 'Управління меню',
+                        items: items,
+                        onSelect: function (item) {
+                            toggleItemVisibility(item.component);
+                        },
+                        onBack: function () {
+                            Lampa.Controller.toggle('settings');
+                        }
+                    });
+                }
+            }, 100);
+        }, 300);
     }
     
     function toggleItemVisibility(component) {
