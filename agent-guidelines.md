@@ -119,7 +119,12 @@ var timer = setInterval(function () {
 
 ## 📝 Learning Log
 
-### 2025-02-15
+### 2025-02-15 (Update 2)
+- **Fixed:** Removed duplicate `random.js` (conflicted with `examples/random-movie.js`)
+- **Issue:** Both files used same `data-action="random"` causing script errors
+- **Solution:** Keep only `examples/random-movie.js` as reference implementation
+
+### 2025-02-15 (Update 1)
 - Fixed duplicate plugins: `random.js` and `examples/random-movie.js` were identical
 - Simplified agent-guidelines.md to focus on AI workflow only
 - All code patterns use ES5 syntax with proper error handling
