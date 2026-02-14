@@ -2,7 +2,7 @@
     'use strict';
 
     function initRandomPlugin() {
-        var network = new Lampa.Reguest();
+        var network = new Lampa.Request();
         var api_url = 'https://api.themoviedb.org/3/';
         var api_key = '4ef66e126d2d9d59079589361de0f6ec';
 
