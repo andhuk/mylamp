@@ -12,10 +12,12 @@
                 Lampa.Loading.start();
                 var page = Math.floor(Math.random() * 10) + 1;
                 
-                // Використовуємо популярні фільми замість discover
-                var method = item.type === 'movie' ? 'popular' : 'tv/popular';
+                // Використовуємо Lampa.Api для запитів
+                var url = item.type === 'movie' 
+                    ? 'movie/popular?page=' + page 
+                    : 'tv/popular?page=' + page;
                 
-                Lampa.TMDB.get(method, {page: page}, function (data) {
+                Lampa.Api.get(url, function (data) {
                     Lampa.Loading.stop();
                     if (data && data.results && data.results.length) {
                         var movies = data.results;
