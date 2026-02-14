@@ -25,13 +25,19 @@
     function getSettingsItems() {
         var items = [];
         var settingsItems = $('.settings .settings-param[data-component]');
+        if (settingsItems.length === 0) {
+            settingsItems = $('.settings-list .settings-param[data-component]');
+        }
         
         console.log(PLUGIN_NAME, 'Found settings items:', settingsItems.length);
         
         settingsItems.each(function() {
             var item = $(this);
             var component = item.attr('data-component');
-            var name = item.find('.settings-param__name').text();
+            var name = item.find('.settings-param__name').text().trim();
+            if (!name) {
+                name = item.text().trim().split('\n')[0].trim();
+            }
             
             if (component && component !== 'clean_menu' && name) {
                 items.push({
@@ -126,36 +132,33 @@
     function showManageDialog() {
         console.log(PLUGIN_NAME, 'showManageDialog called');
         
-        // Go back to main settings first
-        Lampa.Activity.back();
+        var pollAttempts = 0;
+        var maxAttempts = 25;
+        var pollMs = 200;
         
-        setTimeout(function() {
-            var settings = getSettings();
+        function tryShowEditor() {
             var items = getSettingsItems();
+            if (items.length > 0) {
+                console.log(PLUGIN_NAME, 'Building menu editor with', items.length, 'items');
+                buildAndShowEditor(items);
+                return true;
+            }
+            return false;
+        }
+        
+        function buildAndShowEditor(items) {
+            var settings = getSettings();
             var hiddenSet = {};
             var itemMap = {};
             var orderedItems = [];
             var i;
             
-            if (items.length === 0) {
-                Lampa.Noty.show('Розділи не знайдено. Відкрийте налаштування спочатку.');
-                console.warn(PLUGIN_NAME, 'No items found');
-                return;
-            }
-            
-            console.log(PLUGIN_NAME, 'Building menu editor with', items.length, 'items');
-            
-            // Build hidden set
             for (i = 0; i < settings.hidden.length; i++) {
                 hiddenSet[settings.hidden[i]] = true;
             }
-            
-            // Build item map
             for (i = 0; i < items.length; i++) {
                 itemMap[items[i].id] = items[i];
             }
-            
-            // Build ordered items list
             var orderedSet = {};
             for (i = 0; i < settings.order.length; i++) {
                 var orderId = settings.order[i];
@@ -168,8 +171,6 @@
                     orderedSet[orderId] = true;
                 }
             }
-            
-            // Add remaining items not in order
             for (i = 0; i < items.length; i++) {
                 if (!orderedSet[items[i].id]) {
                     orderedItems.push({
@@ -179,9 +180,29 @@
                     });
                 }
             }
-            
             showMenuEditor(orderedItems);
-        }, 500);
+        }
+        
+        function poll() {
+            pollAttempts += 1;
+            if (tryShowEditor()) {
+                return;
+            }
+            if (pollAttempts >= maxAttempts) {
+                Lampa.Noty.show('Розділи не знайдено. Відкрийте налаштування спочатку.');
+                console.warn(PLUGIN_NAME, 'No items found after', maxAttempts, 'attempts');
+                return;
+            }
+            setTimeout(poll, pollMs);
+        }
+        
+        // If we already have sections in DOM (e.g. main settings list visible), use them
+        if (tryShowEditor()) {
+            return;
+        }
+        // Otherwise go back to main settings and wait for DOM
+        Lampa.Activity.back();
+        setTimeout(poll, pollMs);
     }
     
     function showMenuEditor(items) {

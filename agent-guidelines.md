@@ -134,6 +134,11 @@ var timer = setInterval(function () {
 
 ## 📝 Learning Log
 
+### 2025-02-15 (Update 5)
+- **Fixed:** clean-menu.js "Розділи не знайдено. Відкрийте налаштування спочатку." when opening Manage sections
+- **Issue:** After Lampa.Activity.back() the settings list DOM was not ready in 500ms, getSettingsItems() returned []
+- **Solution:** Poll for `.settings .settings-param[data-component]` every 200ms (max 25 attempts); try reading DOM before calling back(); fallback selector `.settings-list .settings-param[data-component]` and fallback for section name from element text
+
 ### 2025-02-15 (Update 4)
 - **Fixed:** clean-menu.js now manages SETTINGS menu items (Налаштування, Синхронізація, etc.)
 - **Issue:** Was trying to manage main navigation menu instead of settings menu
