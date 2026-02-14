@@ -1,8 +1,6 @@
 (function () {
     'use strict';
 
-    var network = new Lampa.Reguest();
-
     function spin() {
         Lampa.Select.show({
             title: 'Рандомний вибір',
@@ -14,10 +12,14 @@
                 Lampa.Loading.start();
                 var page = Math.floor(Math.random() * 20) + 1;
                 
-                // Використовуємо вбудований API Lampa
-                var url = Lampa.TMDB.api('discover/' + item.type + '?sort_by=vote_count.desc&vote_count.gte=200&page=' + page);
+                // Використовуємо Lampa.TMDB.get для запитів
+                var params = {
+                    sort_by: 'vote_count.desc',
+                    'vote_count.gte': 200,
+                    page: page
+                };
                 
-                network.silent(url, function (data) {
+                Lampa.TMDB.get('discover/' + item.type, params, function (data) {
                     Lampa.Loading.stop();
                     if (data && data.results && data.results.length) {
                         var movies = data.results;
