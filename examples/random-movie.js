@@ -13,6 +13,13 @@
      * Отримати випадковий фільм
      */
     function getRandomMovie() {
+        // Перевірка API
+        if (!Lampa.Api || !Lampa.Api.sources || !Lampa.Api.sources.tmdb) {
+            console.log(PLUGIN_NAME, 'TMDB API not available');
+            Lampa.Noty.show('API недоступний');
+            return;
+        }
+        
         Lampa.Select.show({
             title: 'Випадковий вибір',
             items: [
@@ -34,10 +41,13 @@
                     Lampa.Loading.stop();
                     
                     if (data && data.results && data.results.length) {
-                        // Фільтрувати за рейтингом
-                        var movies = data.results.filter(function(m) {
-                            return m.vote_average >= 6.5;
-                        });
+                        // Фільтрувати за рейтингом (ES5 цикл замість filter)
+                        var movies = [];
+                        for (var i = 0; i < data.results.length; i++) {
+                            if (data.results[i].vote_average >= 6.5) {
+                                movies.push(data.results[i]);
+                            }
+                        }
                         
                         if (movies.length === 0) movies = data.results;
                         
@@ -59,6 +69,9 @@
                     console.log(PLUGIN_NAME, 'Error:', error);
                     Lampa.Noty.show('Помилка API');
                 });
+            },
+            onBack: function () {
+                Lampa.Controller.toggle('menu');
             }
         });
     }

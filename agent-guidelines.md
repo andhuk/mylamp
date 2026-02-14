@@ -30,6 +30,7 @@ git push origin main
 ## ⚠️ Заборонено
 
 - ES6+ (arrow functions, let/const, template literals, async/await)
+- ES5.1+ methods that may not work (.filter, .map, .forEach - use for loops)
 - External dependencies
 - Promises (use callbacks)
 
@@ -118,6 +119,12 @@ var timer = setInterval(function () {
 **Last updated:** 2025-02-15
 
 ## 📝 Learning Log
+
+### 2025-02-15 (Update 3)
+- **Fixed:** Script error in random-movie.js
+- **Issue:** Used `.filter()` method (ES5.1) - not compatible with all Lampa versions
+- **Solution:** Replaced with ES5 `for` loop + added API availability check
+- **Added:** `onBack` handler for Select dialog
 
 ### 2025-02-15 (Update 2)
 - **Fixed:** Removed duplicate `random.js` (conflicted with `examples/random-movie.js`)
