@@ -4,6 +4,7 @@
  * Додає розділ налаштувань в Lampa
  */
 
+
 (function () {
     'use strict';
 
