@@ -10,16 +10,12 @@
             ],
             onSelect: function (item) {
                 Lampa.Loading.start();
-                var page = Math.floor(Math.random() * 20) + 1;
+                var page = Math.floor(Math.random() * 10) + 1;
                 
-                // Використовуємо Lampa.TMDB.get для запитів
-                var params = {
-                    sort_by: 'vote_count.desc',
-                    'vote_count.gte': 200,
-                    page: page
-                };
+                // Використовуємо популярні фільми замість discover
+                var method = item.type === 'movie' ? 'popular' : 'tv/popular';
                 
-                Lampa.TMDB.get('discover/' + item.type, params, function (data) {
+                Lampa.TMDB.get(method, {page: page}, function (data) {
                     Lampa.Loading.stop();
                     if (data && data.results && data.results.length) {
                         var movies = data.results;
@@ -38,7 +34,7 @@
                         Lampa.Activity.push({
                             component: 'full',
                             id: movie.id,
-                            method: item.type === 'movie' ? 'movie' : 'tv',
+                            method: item.type,
                             card: movie
                         });
                     } else {
