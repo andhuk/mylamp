@@ -10,14 +10,23 @@
             ],
             onSelect: function (item) {
                 Lampa.Loading.start();
+                
+                // Використовуємо вбудований API через sources
+                var api = Lampa.Api.sources.tmdb;
                 var page = Math.floor(Math.random() * 10) + 1;
                 
-                // Використовуємо Lampa.Api для запитів
-                var url = item.type === 'movie' 
-                    ? 'movie/popular?page=' + page 
-                    : 'tv/popular?page=' + page;
+                var params = {
+                    page: page,
+                    language: api.language
+                };
                 
-                Lampa.Api.get(url, function (data) {
+                var url = item.type === 'movie' 
+                    ? api.url('movie/popular', params)
+                    : api.url('tv/popular', params);
+                
+                var network = new Lampa.Reguest();
+                
+                network.silent(url, function (data) {
                     Lampa.Loading.stop();
                     if (data && data.results && data.results.length) {
                         var movies = data.results;
