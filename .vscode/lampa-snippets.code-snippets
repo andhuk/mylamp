@@ -1,0 +1,297 @@
+{
+  "Lampa Basic Plugin": {
+    "prefix": "lampa-basic",
+    "body": [
+      "(function () {",
+      "    'use strict';",
+      "",
+      "    function startPlugin() {",
+      "        console.log('${1:PluginName}', 'Started');",
+      "        $0",
+      "    }",
+      "",
+      "    if (window.appready) {",
+      "        startPlugin();",
+      "    } else {",
+      "        Lampa.Listener.follow('app', function (e) {",
+      "            if (e.type === 'ready') {",
+      "                startPlugin();",
+      "            }",
+      "        });",
+      "    }",
+      "})();"
+    ],
+    "description": "Базовий шаблон плагіна Lampa"
+  },
+  
+  "Lampa Menu Item": {
+    "prefix": "lampa-menu",
+    "body": [
+      "var menuTimer = setInterval(function () {",
+      "    var menu = $$('.menu .menu__list');",
+      "    if (menu.length) {",
+      "        clearInterval(menuTimer);",
+      "        ",
+      "        $$('.menu__item[data-action=\"${1:action_id}\"]').remove();",
+      "        ",
+      "        var icon = '${2:<svg>...</svg>}';",
+      "        var menuItem = $$('<li class=\"menu__item selector\" data-action=\"${1:action_id}\">' +",
+      "            '<div class=\"menu__ico\">' + icon + '</div>' +",
+      "            '<div class=\"menu__text\">${3:Menu Text}</div>' +",
+      "            '</li>');",
+      "        ",
+      "        menuItem.on('hover:enter', function() {",
+      "            $0",
+      "        });",
+      "        ",
+      "        menu.prepend(menuItem);",
+      "    }",
+      "}, 100);"
+    ],
+    "description": "Додати пункт в меню навігації"
+  },
+  
+  "Lampa Head Button": {
+    "prefix": "lampa-head-button",
+    "body": [
+      "var timer = setInterval(function () {",
+      "    var actions = $$('.head__actions');",
+      "    if (actions.length) {",
+      "        clearInterval(timer);",
+      "        ",
+      "        $$('#${1:button_id}').remove();",
+      "        var button = $$('<div id=\"${1:button_id}\" class=\"head__action selector\">' +",
+      "            '${2:<svg>...</svg>}' +",
+      "            '</div>');",
+      "        ",
+      "        button.on('hover:enter hover:click hover:touch', function () {",
+      "            $0",
+      "        });",
+      "        ",
+      "        actions.append(button);",
+      "    }",
+      "}, 100);"
+    ],
+    "description": "Додати кнопку в шапку"
+  },
+  
+  "Lampa Settings Component": {
+    "prefix": "lampa-settings",
+    "body": [
+      "Lampa.SettingsApi.addComponent({",
+      "    component: '${1:component_id}',",
+      "    icon: '${2:<svg>...</svg>}',",
+      "    name: '${3:Component Name}'",
+      "});",
+      "",
+      "Lampa.SettingsApi.addParam({",
+      "    component: '${1:component_id}',",
+      "    param: {",
+      "        name: '${4:setting_name}',",
+      "        type: '${5|trigger,input,button|}',",
+      "        default: ${6:false}",
+      "    },",
+      "    field: {",
+      "        name: '${7:Setting Name}'",
+      "    },",
+      "    onChange: function (value) {",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Створити розділ налаштувань"
+  },
+  
+  "Lampa Storage Get/Set": {
+    "prefix": "lampa-storage",
+    "body": [
+      "function getData() {",
+      "    return Lampa.Storage.get('${1:storage_key}', ${2:{}});",
+      "}",
+      "",
+      "function saveData(data) {",
+      "    Lampa.Storage.set('${1:storage_key}', data);",
+      "}",
+      "",
+      "$0"
+    ],
+    "description": "Storage getter/setter"
+  },
+  
+  "Lampa API Request": {
+    "prefix": "lampa-api",
+    "body": [
+      "var network = new Lampa.Reguest();",
+      "",
+      "network.silent('${1:url}',",
+      "    function (data) {",
+      "        // Success",
+      "        $0",
+      "    },",
+      "    function (error) {",
+      "        // Error",
+      "        console.log('${2:PluginName}', 'Error:', error);",
+      "        Lampa.Noty.show('Помилка API');",
+      "    }",
+      ");"
+    ],
+    "description": "HTTP запит"
+  },
+  
+  "Lampa TMDB Request": {
+    "prefix": "lampa-tmdb",
+    "body": [
+      "var api = Lampa.Api.sources.tmdb;",
+      "var url = api.url('${1:movie/popular}', {",
+      "    page: ${2:1},",
+      "    language: api.language",
+      "});",
+      "",
+      "var network = new Lampa.Reguest();",
+      "network.silent(url, function (data) {",
+      "    if (data && data.results) {",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "TMDB API запит"
+  },
+  
+  "Lampa Listener": {
+    "prefix": "lampa-listener",
+    "body": [
+      "Lampa.Listener.follow('${1|app,full,activity|}', function (e) {",
+      "    if (e.type === '${2|ready,complite,start|}') {",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Підписка на події"
+  },
+  
+  "Lampa Activity Push": {
+    "prefix": "lampa-activity",
+    "body": [
+      "Lampa.Activity.push({",
+      "    component: '${1:full}',",
+      "    id: ${2:movie.id},",
+      "    method: '${3|movie,tv|}',",
+      "    card: ${4:movie}",
+      "});"
+    ],
+    "description": "Відкрити нову активність"
+  },
+  
+  "Lampa Select Dialog": {
+    "prefix": "lampa-select",
+    "body": [
+      "Lampa.Select.show({",
+      "    title: '${1:Title}',",
+      "    items: [",
+      "        {title: '${2:Option 1}', value: '${3:opt1}'}",
+      "    ],",
+      "    onSelect: function (item) {",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Діалог вибору"
+  },
+  
+  "Lampa Modal": {
+    "prefix": "lampa-modal",
+    "body": [
+      "var modal = $$('<div class=\"about\"><div class=\"about__text\">${1:Content}</div></div>');",
+      "",
+      "Lampa.Modal.open({",
+      "    title: '${2:Title}',",
+      "    html: modal,",
+      "    size: '${3|small,medium,large|}',",
+      "    onBack: function () {",
+      "        Lampa.Modal.close();",
+      "    }",
+      "});"
+    ],
+    "description": "Модальне вікно"
+  },
+  
+  "Lampa Loading": {
+    "prefix": "lampa-loading",
+    "body": [
+      "Lampa.Loading.start();",
+      "$0",
+      "Lampa.Loading.stop();"
+    ],
+    "description": "Індикатор завантаження"
+  },
+  
+  "Lampa Noty": {
+    "prefix": "lampa-noty",
+    "body": [
+      "Lampa.Noty.show('${1:Message}');"
+    ],
+    "description": "Показати повідомлення"
+  },
+  
+  "Lampa Console Log": {
+    "prefix": "lampa-log",
+    "body": [
+      "console.log('${1:PluginName}', '${2:Event}', ${3:data});"
+    ],
+    "description": "Console log з назвою плагіна"
+  },
+  
+  "Lampa Wait Element": {
+    "prefix": "lampa-wait",
+    "body": [
+      "var timer = setInterval(function () {",
+      "    var element = $$('${1:.selector}');",
+      "    if (element.length) {",
+      "        clearInterval(timer);",
+      "        $0",
+      "    }",
+      "}, 100);"
+    ],
+    "description": "Чекати появи елемента"
+  },
+  
+  "Lampa Full Card Listener": {
+    "prefix": "lampa-full-card",
+    "body": [
+      "Lampa.Listener.follow('full', function (e) {",
+      "    if (e.type === 'complite' && e.data && e.data.movie) {",
+      "        var movie = e.data.movie;",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Відстежити відкриття картки фільму"
+  },
+  
+  "Lampa Timeline Update": {
+    "prefix": "lampa-timeline",
+    "body": [
+      "Lampa.Timeline.listener.follow('update', function (e) {",
+      "    if (e.data) {",
+      "        var hash = e.data.hash;",
+      "        var percent = e.data.road.percent;",
+      "        var time = e.data.road.time;",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Відстежити прогрес перегляду"
+  },
+  
+  "Lampa Storage Watch": {
+    "prefix": "lampa-storage-watch",
+    "body": [
+      "Lampa.Storage.listener.follow('change', function (e) {",
+      "    if (e.name === '${1:storage_key}') {",
+      "        $0",
+      "    }",
+      "});"
+    ],
+    "description": "Підписатися на зміни Storage"
+  }
+}
