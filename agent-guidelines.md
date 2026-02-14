@@ -121,17 +121,24 @@ var timer = setInterval(function () {
 ## 📝 Examples
 
 ### clean-menu.js
-Плагін для управління меню налаштувань:
-- Приховування/показ розділів
-- Діалог управління через Select
-- Збереження налаштувань в Storage
-- ES5 compatible з перевіркою існування елементів
+Плагін для управління меню налаштувань (Налаштування, Синхронізація, Інтерфейс, Канали, Плеєр):
+- Приховування/показ розділів через чекбокси
+- Зміна порядку стрілками вгору/вниз
+- Модальне вікно з Lampa.Modal.open()
+- Збереження при onBack
+- ES5 compatible з таймерами для DOM
 
 ---
 
 **Last updated:** 2025-02-15
 
 ## 📝 Learning Log
+
+### 2025-02-15 (Update 4)
+- **Fixed:** clean-menu.js now manages SETTINGS menu items (Налаштування, Синхронізація, etc.)
+- **Issue:** Was trying to manage main navigation menu instead of settings menu
+- **Solution:** Changed to use `.settings .settings-param[data-component]` selector
+- **Added:** Modal editor with checkboxes and arrows, saves on back button
 
 ### 2025-02-15 (Update 3)
 - **Fixed:** Script error in random-movie.js
