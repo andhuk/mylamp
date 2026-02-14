@@ -2,8 +2,6 @@
     'use strict';
 
     var network = new Lampa.Reguest();
-    var api_url = 'https://api.themoviedb.org/3/';
-    var api_key = '4ef66e126d2d9d59079589361de0f6ec';
 
     function spin() {
         Lampa.Select.show({
@@ -16,45 +14,39 @@
                 Lampa.Loading.start();
                 var page = Math.floor(Math.random() * 20) + 1;
                 
-                network.silent(
-                    api_url + 'discover/' + item.type + 
-                    '?api_key=' + api_key + 
-                    '&language=uk-UA' +
-                    '&sort_by=vote_count.desc' +
-                    '&vote_count.gte=200' +
-                    '&page=' + page,
-                    function (data) {
-                        Lampa.Loading.stop();
-                        if (data && data.results && data.results.length) {
-                            var movies = data.results;
-                            var topMovies = [];
-                            
-                            for (var i = 0; i < movies.length; i++) {
-                                if (movies[i].vote_average >= 6.5) {
-                                    topMovies.push(movies[i]);
-                                }
+                // Використовуємо вбудований API Lampa
+                var url = Lampa.TMDB.api('discover/' + item.type + '?sort_by=vote_count.desc&vote_count.gte=200&page=' + page);
+                
+                network.silent(url, function (data) {
+                    Lampa.Loading.stop();
+                    if (data && data.results && data.results.length) {
+                        var movies = data.results;
+                        var topMovies = [];
+                        
+                        for (var i = 0; i < movies.length; i++) {
+                            if (movies[i].vote_average >= 6.5) {
+                                topMovies.push(movies[i]);
                             }
-                            
-                            if (topMovies.length === 0) topMovies = movies;
-                            
-                            var movie = topMovies[Math.floor(Math.random() * topMovies.length)];
-                            
-                            Lampa.Activity.push({
-                                component: 'full',
-                                id: movie.id,
-                                method: item.type === 'movie' ? 'movie' : 'tv',
-                                card: movie
-                            });
-                        } else {
-                            Lampa.Noty.show('Помилка завантаження');
                         }
-                    },
-                    function (error) {
-                        Lampa.Loading.stop();
-                        console.log('Random', 'API Error:', error);
-                        Lampa.Noty.show('Помилка API');
+                        
+                        if (topMovies.length === 0) topMovies = movies;
+                        
+                        var movie = topMovies[Math.floor(Math.random() * topMovies.length)];
+                        
+                        Lampa.Activity.push({
+                            component: 'full',
+                            id: movie.id,
+                            method: item.type === 'movie' ? 'movie' : 'tv',
+                            card: movie
+                        });
+                    } else {
+                        Lampa.Noty.show('Помилка завантаження');
                     }
-                );
+                }, function (error) {
+                    Lampa.Loading.stop();
+                    console.log('Random', 'API Error:', error);
+                    Lampa.Noty.show('Помилка API');
+                });
             }
         });
     }
