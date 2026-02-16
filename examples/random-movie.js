@@ -1,124 +1,71 @@
-/**
- * Приклад: Випадковий фільм
- * 
- * Додає пункт "Рандом" в меню, який відкриває випадковий популярний фільм
- */
-
 (function () {
     'use strict';
 
-    var PLUGIN_NAME = 'RandomMovie';
-
-    /**
-     * Отримати випадковий фільм
-     */
-    function getRandomMovie() {
-        // Перевірка API
-        if (!Lampa.Api || !Lampa.Api.sources || !Lampa.Api.sources.tmdb) {
-            console.log(PLUGIN_NAME, 'TMDB API not available');
-            Lampa.Noty.show('API недоступний');
-            return;
-        }
+    Lampa.Plugins.add('random_dice_recommender', function () {
         
-        Lampa.Select.show({
-            title: 'Випадковий вибір',
-            items: [
-                {title: 'Фільм', type: 'movie'},
-                {title: 'Серіал', type: 'tv'}
-            ],
-            onSelect: function (item) {
-                Lampa.Loading.start();
-                
-                var api = Lampa.Api.sources.tmdb;
-                var page = Math.floor(Math.random() * 10) + 1;
-                var url = api.url(item.type + '/popular', {
-                    page: page,
-                    language: api.language
-                });
-                
-                var network = new Lampa.Reguest();
-                network.silent(url, function (data) {
-                    Lampa.Loading.stop();
-                    
-                    if (data && data.results && data.results.length) {
-                        // Фільтрувати за рейтингом (ES5 цикл замість filter)
-                        var movies = [];
-                        for (var i = 0; i < data.results.length; i++) {
-                            if (data.results[i].vote_average >= 6.5) {
-                                movies.push(data.results[i]);
-                            }
-                        }
+        // 1. Define the Button in Sidebar
+        Lampa.Main.add({
+            id: 'random_dice',
+            title: 'Random',
+            icon: '<svg height="36" viewBox="0 0 24 24" width="36" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm10 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM7 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm5-5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="white"/></svg>',
+            onSelect: function () {
+                getRandomRecommendation();
+            }
+        });
+
+        // 2. Data Retrieval Logic
+        function getRandomRecommendation() {
+            // Extract IDs from Lampa Storage
+            let history = Lampa.Storage.get('history', '[]');
+            let favorites = Lampa.Storage.get('favorite', '[]');
+            let rated = Lampa.Storage.get('items_vote', '[]');
+
+            // Merge and deduplicate source IDs
+            let sourcePool = [...history, ...favorites, ...rated].filter(item => item.id);
+            
+            if (sourcePool.length === 0) {
+                Lampa.Noty.show('No data found in history or favorites.');
+                return;
+            }
+
+            // Pick a random seed item
+            let seed = sourcePool[Math.floor(Math.random() * sourcePool.length)];
+            
+            fetchSimilar(seed);
+        }
+
+        // 3. API Call for Similar Content (TMDB Example)
+        function fetchSimilar(seed) {
+            let type = seed.type || 'movie';
+            let url = `https://api.themoviedb.org/3/${type}/${seed.id}/recommendations?api_key=${Lampa.TMDB.key()}&language=${Lampa.Storage.get('language','ru')}`;
+
+            Lampa.Loading.show();
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    Lampa.Loading.hide();
+                    if (data.results && data.results.length > 0) {
+                        let result = data.results[Math.floor(Math.random() * data.results.length)];
                         
-                        if (movies.length === 0) movies = data.results;
-                        
-                        // Вибрати випадковий
-                        var movie = movies[Math.floor(Math.random() * movies.length)];
-                        
-                        // Відкрити картку
+                        // Push to Full Info Screen
                         Lampa.Activity.push({
+                            url: '',
+                            title: 'Full Info',
                             component: 'full',
-                            id: movie.id,
-                            method: item.type,
-                            card: movie
+                            id: result.id,
+                            method: type,
+                            card: result,
+                            source: 'tmdb'
                         });
                     } else {
-                        Lampa.Noty.show('Помилка завантаження');
+                        Lampa.Noty.show('Could not find similar items.');
                     }
-                }, function (error) {
-                    Lampa.Loading.stop();
-                    console.log(PLUGIN_NAME, 'Error:', error);
-                    Lampa.Noty.show('Помилка API');
+                })
+                .catch(() => {
+                    Lampa.Loading.hide();
+                    Lampa.Noty.show('Network Error');
                 });
-            },
-            onBack: function () {
-                Lampa.Controller.toggle('menu');
-            }
-        });
-    }
-
-    /**
-     * Додати пункт в меню
-     */
-    function addMenuItem() {
-        var menuTimer = setInterval(function () {
-            var menu = $('.menu .menu__list');
-            if (menu.length) {
-                clearInterval(menuTimer);
-                
-                $('.menu__item[data-action="random"]').remove();
-                
-                var icon = '<svg height="36" viewBox="0 0 24 24" width="36" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="currentColor"/>' +
-                    '</svg>';
-                
-                var menuItem = $('<li class="menu__item selector" data-action="random">' +
-                    '<div class="menu__ico">' + icon + '</div>' +
-                    '<div class="menu__text">Рандом</div>' +
-                    '</li>');
-                
-                menuItem.on('hover:enter', getRandomMovie);
-                menu.prepend(menuItem);
-                
-                console.log(PLUGIN_NAME, 'Menu item added');
-            }
-        }, 100);
-    }
-
-    /**
-     * Ініціалізація
-     */
-    function startPlugin() {
-        console.log(PLUGIN_NAME, 'Starting...');
-        addMenuItem();
-    }
-
-    if (window.appready) {
-        startPlugin();
-    } else {
-        Lampa.Listener.follow('app', function (e) {
-            if (e.type === 'ready') {
-                startPlugin();
-            }
-        });
-    }
+        }
+    });
 })();
